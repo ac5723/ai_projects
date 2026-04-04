@@ -1,0 +1,25 @@
+Company: TechCorp India
+Founded: 2010
+CEO: Rahul Sharma
+Headquarters: Bangalore, India
+
+Products:
+- CloudSync: A cloud storage solution launched in 2018
+- AIAssist: An AI powered customer support tool launched in 2021
+- DataVault: A secure data management platform launched in 2023
+
+Refund Policy:
+All products come with a 30 day money back guarantee.
+Customers can request refunds within 30 days of purchase.
+Refunds are processed within 5-7 business days.
+No refund is applicable after 30 days.
+
+Support:
+Email: support@techcorp.in
+Phone: 1800-123-4567
+Working hours: Monday to Friday, 9 AM to 6 PM IST
+
+Pricing:
+CloudSync: Rs 499 per month
+AIAssist: Rs 999 per month
+DataVault: Rs 1499 per month
