@@ -12,6 +12,10 @@ from langchain_core.prompts import ChatPromptTemplate
 
 load_dotenv()
 
+
+api_key = str(os.getenv("OPENROUTER_API_KEY"))
+print(f"API Key loaded: {api_key[:10]}...")  # prints first 10 chars only
+
 # ─────────────────────────────────────────
 # STEP 1 — Load Document
 # ─────────────────────────────────────────
@@ -66,10 +70,14 @@ retriever = vectorstore.as_retriever(
 # STEP 6 — Setup LLM via OpenRouter
 # ─────────────────────────────────────────
 print("\n🤖 Setting up LLM...")
+
+api_key = str(os.getenv("OPENROUTER_API_KEY"))
+
 llm = ChatOpenAI(
-    model="openrouter/auto",
-    openai_api_key=os.getenv("OPENROUTER_API_KEY"),
+    model="openrouter/auto",       # 👈 correct OpenRouter model
+    openai_api_key=api_key,
     openai_api_base="https://openrouter.ai/api/v1",
+    temperature=0
 )
 print("✅ LLM ready")
 
