@@ -65,7 +65,7 @@ retriever = vectorstore.as_retriever(
 # ─────────────────────────────────────────
 print("\n🤖 Setting up LLM...")
 llm = ChatOpenAI(
-    model="anthropic/claude-sonnet-4-6",
+    model="deepseek/deepseek-r1",
     openai_api_key=api_key,
     openai_api_base="https://openrouter.ai/api/v1",
     temperature=0
