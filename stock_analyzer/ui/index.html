@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSE Stock Analyzer 📈</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0a0e1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            color: #fff;
+        }
+        .header span {
+            font-size: 2rem;
+        }
+        .header p {
+            color: #90caf9;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        /* Main container */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Control panel */
+        .control-panel {
+            background: #111827;
+            border: 1px solid #1e3a5f;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .control-panel h2 {
+            color: #90caf9;
+            margin-bottom: 24px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            color: #90caf9;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select {
+            background: #1a2744;
+            border: 1px solid #2a4a7f;
+            color: #e0e0e0;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            border-color: #42a5f5;
+        }
+
+        select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-analyze {
+            background: linear-gradient(135deg, #1565c0, #42a5f5);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .btn-analyze:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(66, 165, 245, 0.4);
+        }
+
+        .btn-analyze:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Status bar */
+        .status-bar {
+            background: #111827;
+            border: 1px solid #1e3a5f;
+            border-radius: 10px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-bar.show { display: flex; }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #1e3a5f;
+            border-top: 3px solid #42a5f5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-text { color: #90caf9; }
+
+        /* Report section */
+        .report-section {
+            display: none;
+        }
+
+        .report-section.show { display: block; }
+
+        .report-header {
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            border-radius: 16px 16px 0 0;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-header h2 {
+            color: #fff;
+            font-size: 1.3rem;
+        }
+
+        .report-header .badge {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .report-body {
+            background: #111827;
+            border: 1px solid #1e3a5f;
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+            padding: 30px;
+        }
+
+        /* Report content styling */
+        .report-content {
+            line-height: 1.8;
+            white-space: pre-wrap;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
+            color: #e0e0e0;
+        }
+
+        .report-content h1,
+        .report-content h2,
+        .report-content h3 {
+            color: #42a5f5;
+            margin: 16px 0 8px 0;
+        }
+
+        /* Signal badges */
+        .signal-buy {
+            display: inline-block;
+            background: #1b5e20;
+            color: #69f0ae;
+            padding: 8px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 8px 0;
+        }
+
+        .signal-sell {
+            display: inline-block;
+            background: #b71c1c;
+            color: #ff8a80;
+            padding: 8px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 8px 0;
+        }
+
+        .signal-hold {
+            display: inline-block;
+            background: #e65100;
+            color: #ffd180;
+            padding: 8px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 8px 0;
+        }
+
+        /* Download button */
+        .btn-download {
+            background: #1b5e20;
+            color: #69f0ae;
+            border: 1px solid #69f0ae;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-download:hover {
+            background: #69f0ae;
+            color: #1b5e20;
+        }
+
+        /* Error */
+        .error-box {
+            background: #1a0a0a;
+            border: 1px solid #f44336;
+            border-radius: 10px;
+            padding: 20px;
+            color: #f44336;
+            display: none;
+        }
+
+        .error-box.show { display: block; }
+
+        /* Disclaimer */
+        .disclaimer {
+            background: #1a1a0a;
+            border: 1px solid #f57f17;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-top: 24px;
+            color: #ffb74d;
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .header h1 { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <span>📈</span>
+    <div>
+        <h1>NSE Stock Technical Analyzer</h1>
+        <p>AI-powered technical analysis with buy/sell signals for Indian stocks</p>
+    </div>
+</div>
+
+<!-- Main Container -->
+<div class="container">
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <h2>🔍 Select Stock to Analyze</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Sector</label>
+                <select id="sectorSelect" onchange="loadStocks()">
+                    <option value="">-- Select Sector --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Stock</label>
+                <select id="stockSelect" disabled>
+                    <option value="">-- Select Stock --</option>
+                </select>
+            </div>
+            <button class="btn-analyze"
+                    id="analyzeBtn"
+                    onclick="analyzeStock()"
+                    disabled>
+                🚀 Generate Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar" id="statusBar">
+        <div class="spinner"></div>
+        <span class="status-text" id="statusText">
+            Analyzing stock... This may take 1-2 minutes
+        </span>
+    </div>
+
+    <!-- Error Box -->
+    <div class="error-box" id="errorBox">
+        ❌ <span id="errorText"></span>
+    </div>
+
+    <!-- Report Section -->
+    <div class="report-section" id="reportSection">
+        <div class="report-header">
+            <h2>📊 Analysis Report: <span id="reportTitle"></span></h2>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <span class="badge" id="reportTime"></span>
+                <button class="btn-download" onclick="downloadReport()">
+                    ⬇️ Download
+                </button>
+            </div>
+        </div>
+        <div class="report-body">
+            <div class="report-content" id="reportContent"></div>
+        </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+        ⚠️ <strong>Disclaimer:</strong> This tool is for
+        <strong>EDUCATIONAL PURPOSES ONLY</strong>.
+        Do not make real investment decisions based on this analysis.
+        Stock markets are subject to market risks.
+        Please consult a SEBI registered investment advisor
+        before making any investment decisions.
+    </div>
+
+</div>
+
+<script>
+    const API = 'http://localhost:5000/api';
+    let currentReport = '';
+    let currentSymbol = '';
+
+    // Load sectors on page load
+    async function loadSectors() {
+        try {
+            const res = await fetch(`${API}/sectors`);
+            const sectors = await res.json();
+            const select = document.getElementById('sectorSelect');
+            sectors.forEach(sector => {
+                const option = document.createElement('option');
+                option.value = sector;
+                option.textContent = sector;
+                select.appendChild(option);
+            });
+        } catch (e) {
+            showError('Cannot connect to backend. Make sure app.py is running!');
+        }
+    }
+
+    // Load stocks when sector is selected
+    async function loadStocks() {
+        const sector = document.getElementById('sectorSelect').value;
+        const stockSelect = document.getElementById('stockSelect');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+
+        stockSelect.innerHTML = '<option value="">-- Select Stock --</option>';
+        stockSelect.disabled = true;
+        analyzeBtn.disabled = true;
+
+        if (!sector) return;
+
+        try {
+            const res = await fetch(`${API}/stocks/${encodeURIComponent(sector)}`);
+            const stocks = await res.json();
+
+            stocks.forEach(stock => {
+                const option = document.createElement('option');
+                option.value = stock.symbol;
+                option.dataset.name = stock.name;
+                option.textContent = `${stock.name} (${stock.symbol})`;
+                stockSelect.appendChild(option);
+            });
+
+            stockSelect.disabled = false;
+            stockSelect.onchange = () => {
+                analyzeBtn.disabled = !stockSelect.value;
+            };
+        } catch(e) {
+            showError('Failed to load stocks');
+        }
+    }
+
+    // Analyze stock
+    async function analyzeStock() {
+        const stockSelect = document.getElementById('stockSelect');
+        const symbol = stockSelect.value;
+        const name = stockSelect.options[stockSelect.selectedIndex].dataset.name;
+
+        if (!symbol) return;
+
+        // show loading
+        currentSymbol = symbol;
+        showLoading(true);
+        hideReport();
+        hideError();
+
+        // update status messages
+        const messages = [
+            `📊 Fetching data for ${symbol}...`,
+            `🔢 Calculating technical indicators...`,
+            `🔍 Detecting chart patterns...`,
+            `🤖 AI agents analyzing data...`,
+            `📝 Generating trading signal...`,
+        ];
+
+        let msgIndex = 0;
+        const statusText = document.getElementById('statusText');
+        const msgInterval = setInterval(() => {
+            if (msgIndex < messages.length) {
+                statusText.textContent = messages[msgIndex++];
+            }
+        }, 20000);
+
+        try {
+            const res = await fetch(`${API}/analyze`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ symbol, name })
+            });
+
+            const data = await res.json();
+            clearInterval(msgInterval);
+
+            if (data.success) {
+                currentReport = data.report;
+                showReport(symbol, name, data.report);
+            } else {
+                showError(data.error || 'Analysis failed');
+            }
+        } catch(e) {
+            clearInterval(msgInterval);
+            showError('Failed to connect to backend: ' + e.message);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // Show report
+    function showReport(symbol, name, report) {
+        document.getElementById('reportTitle').textContent =
+            `${name} (${symbol})`;
+        document.getElementById('reportTime').textContent =
+            new Date().toLocaleString('en-IN');
+
+        // format report content
+        let formatted = report
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/^# (.*)/gm, '<h1>$1</h1>')
+            .replace(/^## (.*)/gm, '<h2>$1</h2>')
+            .replace(/^### (.*)/gm, '<h3>$1</h3>')
+            .replace(/🟢 (BUY|STRONG BUY)/gi,
+                '<span class="signal-buy">🟢 $1</span>')
+            .replace(/🔴 (SELL|STRONG SELL)/gi,
+                '<span class="signal-sell">🔴 $1</span>')
+            .replace(/🟡 (HOLD|NEUTRAL)/gi,
+                '<span class="signal-hold">🟡 $1</span>');
+
+        document.getElementById('reportContent').innerHTML = formatted;
+        document.getElementById('reportSection').classList.add('show');
+
+        // scroll to report
+        document.getElementById('reportSection')
+            .scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Download report
+    function downloadReport() {
+        const blob = new Blob([currentReport], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${currentSymbol}_analysis.md`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function showLoading(show) {
+        document.getElementById('statusBar').classList
+            .toggle('show', show);
+        document.getElementById('analyzeBtn').disabled = show;
+        document.getElementById('sectorSelect').disabled = show;
+        document.getElementById('stockSelect').disabled = show;
+    }
+
+    function hideReport() {
+        document.getElementById('reportSection').classList.remove('show');
+    }
+
+    function showError(msg) {
+        document.getElementById('errorText').textContent = msg;
+        document.getElementById('errorBox').classList.add('show');
+    }
+
+    function hideError() {
+        document.getElementById('errorBox').classList.remove('show');
+    }
+
+    // initialize
+    loadSectors();
+</script>
+</body>
+</html>
